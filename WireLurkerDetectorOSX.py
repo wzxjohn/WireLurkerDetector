@@ -3,18 +3,18 @@
 
 """Detecting the WireLurker malware family on Mac OS X."""
 
-
-__copyright__    = 'Copyright (c) 2014, Palo Alto Networks, Inc.'
-__author__       = 'Claud Xiao'
-__version__      = '1.0.0'
-
+__copyright__ = 'Copyright (c) 2014, Palo Alto Networks, Inc.'
+__author__ = 'Claud Xiao'
+__version__ = '1.0.0'
+__red__ = "\x1b[1;31m"
+__green__ = "\x1b[1;32m"
+__default__ = "\x1b[0m"
 
 import os
 import sys
 import platform
 import plistlib
 import subprocess
-
 
 MALICIOUS_FILES = [
     '/Users/Shared/run.sh',
@@ -61,9 +61,9 @@ def is_file_hidden(f):
 
     else:
         try:
-            proc = subprocess.Popen("ls -ldO '%s' | awk '{print $5}'" % f, shell=True, 
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT)
+            proc = subprocess.Popen("ls -ldO '%s' | awk '{print $5}'" % f, shell=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT)
             output = proc.stdout.read()
             proc.communicate()
             return output.find('hidden') != -1
@@ -104,12 +104,13 @@ def scan_app():
 
 
 def main():
+    print __green__
     print 'WireLurker Detector (version %s)' % __version__
     print __copyright__
     print ''
 
     if platform.system() != 'Darwin':
-        print 'ERROR: The script should only be run in a Mac OS X system.'
+        print __red__ + 'ERROR: The script should only be run in a Mac OS X system.' + __default__
         sys.exit(-1)
 
     print '[+] Scanning for known malicious files ...'
@@ -118,7 +119,7 @@ def main():
         print '[-] Nothing is found.'
     else:
         for f in mal_files:
-            print '[!] Found malicious file: %s' % f
+            print __red__ + '[!] Found malicious file: %s' % f + __green__
 
     print '[+] Scanning for known suspicious files ...'
     sus_files = scan_files(SUSPICIOUS_FILES)
@@ -126,7 +127,7 @@ def main():
         print '[-] Nothing is found.'
     else:
         for f in sus_files:
-            print '[!] Found suspicious file: %s' % f
+            print __red__ + '[!] Found suspicious file: %s' % f + __green__
 
     print '[+] Scanning for infected applications ... (may take minutes)'
     infected_apps = scan_app()
@@ -134,16 +135,18 @@ def main():
         print '[-] Nothing is found.'
     else:
         for a in infected_apps:
-            print '[!] Found infected application: %s' % a
+            print __red__ + '[!] Found infected application: %s' % a + __green__
 
     if len(mal_files) == 0 and len(sus_files) == 0 and len(infected_apps) == 0:
-        print "[+] Your OS X system isn't infected by the WireLurker. Thank you!"
+        print "[+] Your OS X system isn't infected by the WireLurker. Thank you!" + __default__
         return 0
     else:
+        print __red__
         print "[!] WARNING: Your OS X system is highly suspicious of being infected by the WireLurker.\n" \
               "[!] You may need to delete all malicious or suspicious files and/or applications above.\n" \
-              "[!] For more information about the WireLurker, please refer: \n"\
+              "[!] For more information about the WireLurker, please refer: \n" \
               "[!] http://researchcenter.paloaltonetworks.com/2014/11/wirelurker-new-era-os-x-ios-malware/"
+        print __default__
         return 1
 
 
